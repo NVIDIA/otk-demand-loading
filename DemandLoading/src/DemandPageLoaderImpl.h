@@ -75,6 +75,7 @@ class DemandPageLoaderImpl : public DemandPageLoader
     ~DemandPageLoaderImpl() override = default;
 
     static bool supportsSparseTextures( unsigned int deviceIndex );
+    static bool inTccMode( unsigned int deviceIndex );
 
     unsigned int allocatePages( unsigned int numPages, bool backed ) override;
 

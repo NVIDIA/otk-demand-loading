@@ -77,17 +77,19 @@ demandLoading::Options configure( demandLoading::Options options )
 
 namespace demandLoading {
 
+
 bool DemandPageLoaderImpl::supportsSparseTextures( unsigned int deviceIndex )
 {
     int sparseSupport = 0;
     DEMAND_CUDA_CHECK( cuDeviceGetAttribute( &sparseSupport, CU_DEVICE_ATTRIBUTE_SPARSE_CUDA_ARRAY_SUPPORTED, deviceIndex ) );
+    return sparseSupport;
+}
 
-    // Skip devices in TCC mode.  This guards against an "operation not supported" error when
-    // querying the recommended allocation granularity via cuMemGetAllocationGranularity.
-    int inTccMode = 0;
-    DEMAND_CUDA_CHECK( cuDeviceGetAttribute( &inTccMode, CU_DEVICE_ATTRIBUTE_TCC_DRIVER, deviceIndex ) );
-
-    return sparseSupport && !inTccMode;
+bool DemandPageLoaderImpl::inTccMode( unsigned int deviceIndex )
+{    
+    int tccMode = 0;
+    DEMAND_CUDA_CHECK( cuDeviceGetAttribute( &tccMode, CU_DEVICE_ATTRIBUTE_TCC_DRIVER, deviceIndex ) );
+    return tccMode;
 }
 
 DemandPageLoaderImpl::DemandPageLoaderImpl( RequestProcessor* requestProcessor, const Options& options )
@@ -107,20 +109,24 @@ DemandPageLoaderImpl::DemandPageLoaderImpl( std::shared_ptr<PageTableManager> pa
     , m_pinnedMemoryPool( new PinnedAllocator(), new RingSuballocator( PINNED_ALLOC_SIZE ), PINNED_ALLOC_SIZE, options.maxPinnedMemory )
 {
     // Determine which devices to use.  Look for devices supporting sparse textures first
+    // Skip devices in TCC mode.  This guards against an "operation not supported" error when
+    // querying the recommended allocation granularity via cuMemGetAllocationGranularity.
     for( unsigned int deviceIndex = 0; deviceIndex < m_numDevices; ++deviceIndex )
     {
-        if( m_options.useSparseTextures && supportsSparseTextures( deviceIndex ) )
+        if( m_options.useSparseTextures && supportsSparseTextures( deviceIndex ) && !inTccMode( deviceIndex ) )
             m_devices.push_back( deviceIndex );
     }
 
-    // Fall back to dense textures if no devices supporting sparse textures were found
+    // Fall back to dense textures if no devices supporting sparse textures were found,
+    // excluding devices in TCC mode.
     if( m_devices.empty() )
     {
-        // FIXME: log a warning here that we are falling back to dense textures if m_options.useSparseTextures is true.
-        //throw Exception( "No devices that support CUDA sparse textures were found (sm_60+ required)." );
         m_options.useSparseTextures = false;
         for( unsigned int deviceIndex = 0; deviceIndex < m_numDevices; ++deviceIndex )
-            m_devices.push_back( deviceIndex );
+        {
+            if (!inTccMode(deviceIndex))
+                m_devices.push_back( deviceIndex );
+        }            
     }
 }
 
