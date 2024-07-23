@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <OptiXToolkit/Memory/Allocators.h>
+#include <OptiXToolkit/Memory/Assert.h>
 #include <OptiXToolkit/Memory/FixedSuballocator.h>
 #include <OptiXToolkit/Memory/HeapSuballocator.h>
 #include <OptiXToolkit/Memory/MemoryPool.h>
@@ -60,26 +61,46 @@ class DeviceMemoryManager
     void freeSampler( TextureSampler* sampler ) { m_samplerPool.freeItem( reinterpret_cast<uint64_t>( sampler ) ); }
 
     /// Allocate a TileBlock for this device.
-    otk::TileBlockHandle allocateTileBlock( size_t numBytes ) { return m_tilePool.allocTextureTiles( numBytes ); }
+    otk::TileBlockHandle allocateTileBlock( size_t numBytes )
+    {
+        OTK_MEMORY_ASSERT( m_tilePool );
+        return m_tilePool->allocTextureTiles( numBytes );
+    }
+
     /// Free a TileBlock for this device.
-    void freeTileBlock( const otk::TileBlockDesc& blockDesc ) { m_tilePool.freeTextureTiles( blockDesc ); }
+    void freeTileBlock( const otk::TileBlockDesc& blockDesc )
+    {
+        OTK_MEMORY_ASSERT( m_tilePool );
+        m_tilePool->freeTextureTiles( blockDesc );
+    }
+
     /// Get the memory handle associated with the tileBlock.
     CUmemGenericAllocationHandle getTileBlockHandle( const otk::TileBlockDesc& bh )
     {
-        return m_tilePool.getAllocationHandle( bh.arenaId );
+        OTK_MEMORY_ASSERT( m_tilePool );
+        return m_tilePool->getAllocationHandle( bh.arenaId );
     }
 
     /// Returns true if TileBlocks need to be freed.
-    bool needTileBlocksFreed() const { return m_tilePool.allocatableSpace() < m_tilePool.allocationGranularity(); };
-    /// Returns the arena size for m_tilePool.
-    size_t getTilePoolArenaSize() const { return static_cast<size_t>( m_tilePool.allocationGranularity() ); }
+    bool needTileBlocksFreed() const
+    {
+        return m_tilePool && m_tilePool->allocatableSpace() < m_tilePool->allocationGranularity();
+    };
+
+    /// Returns the arena size for m_tilePool->
+    size_t getTilePoolArenaSize() const { return m_tilePool ? static_cast<size_t>( m_tilePool->allocationGranularity() ) : 2 * 1024 * 1024; }
+
     /// Set the max texture memory
-    void setMaxTextureTileMemory( size_t maxMemory ) { m_tilePool.setMaxSize( static_cast<uint64_t>( maxMemory ) ); }
+    void setMaxTextureTileMemory( size_t maxMemory )
+    {
+        if( m_tilePool )
+            m_tilePool->setMaxSize( static_cast<uint64_t>( maxMemory ) );
+    }
 
     /// Returns the amount of device memory allocated.
     size_t getTotalDeviceMemory() const
     {
-        return m_samplerPool.trackedSize() + m_deviceContextMemory.trackedSize() + m_tilePool.trackedSize();
+        return m_samplerPool.trackedSize() + m_deviceContextMemory.trackedSize() + ( m_tilePool ? m_tilePool->trackedSize() : 0 );
     }
 
     void accumulateStatistics( DeviceStatistics& stats ) const { stats.memoryUsed += getTotalDeviceMemory(); }
@@ -87,9 +108,13 @@ class DeviceMemoryManager
   private:
     Options      m_options;
 
-    otk::MemoryPool<otk::DeviceAllocator, otk::FixedSuballocator>     m_samplerPool;
-    otk::MemoryPool<otk::DeviceAllocator, otk::HeapSuballocator>      m_deviceContextMemory;
-    otk::MemoryPool<otk::TextureTileAllocator, otk::HeapSuballocator> m_tilePool;
+    using SamplerPool = otk::MemoryPool<otk::DeviceAllocator, otk::FixedSuballocator>;
+    using DeviceContextPool = otk::MemoryPool<otk::DeviceAllocator, otk::HeapSuballocator>;
+    using TilePool          = otk::MemoryPool<otk::TextureTileAllocator, otk::HeapSuballocator>;
+
+    SamplerPool               m_samplerPool;
+    DeviceContextPool         m_deviceContextMemory;
+    std::unique_ptr<TilePool> m_tilePool; // null if sparse textures disabled.
 
     std::vector<DeviceContext*> m_deviceContextPool;
     std::vector<DeviceContext*> m_deviceContextFreeList;
