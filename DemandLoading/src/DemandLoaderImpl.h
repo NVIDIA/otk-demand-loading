@@ -180,6 +180,8 @@ class DemandLoaderImpl : public DemandLoader
   private:
     mutable std::mutex        m_mutex;
 
+    bool m_isActive = false;
+
     std::shared_ptr<PageTableManager>     m_pageTableManager;  // Allocates ranges of virtual pages.
     ThreadPoolRequestProcessor            m_requestProcessor;  // Asynchronously processes page requests.
     std::unique_ptr<DemandPageLoaderImpl> m_pageLoader;
