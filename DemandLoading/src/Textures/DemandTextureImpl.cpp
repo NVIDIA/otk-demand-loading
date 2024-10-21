@@ -257,6 +257,7 @@ void DemandTextureImpl::initSampler()
         m_sampler.numPages = 0;
         m_sampler.startPage = m_id;
     }
+    m_sampler.conservativeFilter = m_descriptor.conservativeFilter;
 }
 
 const imageSource::TextureInfo& DemandTextureImpl::getInfo() const

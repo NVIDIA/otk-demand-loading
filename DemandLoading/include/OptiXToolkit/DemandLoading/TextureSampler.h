@@ -85,6 +85,8 @@ struct TextureSampler
     unsigned int udimStartPage;
     unsigned short udim;
     unsigned short vdim;
+
+    unsigned int conservativeFilter : 1;
 };
 
 // Indexing related to base colors

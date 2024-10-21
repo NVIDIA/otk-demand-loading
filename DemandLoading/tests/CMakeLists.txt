@@ -76,6 +76,25 @@ otk_add_executable( testDemandLoading
   TestTraceFile.cpp
   )
 
+if( OTK_USE_OIIO )
+endif()
+
+find_package(OpenImageIO QUIET)
+if(OpenImageIO_FOUND)
+  set(Boost_NO_WARN_NEW_VERSIONS ON)
+  find_package(Boost COMPONENTS system filesystem thread REQUIRED)
+  target_sources( testDemandLoading PRIVATE
+    TestCubicFiltering.cpp
+    TestCubicFiltering.cu
+    TestCubicFiltering.h
+  )
+  target_link_libraries( testDemandLoading
+    OpenImageIO::OpenImageIO
+    Boost::filesystem
+    Boost::thread
+  )
+endif()
+
 source_group( "CUDA Files" REGULAR_EXPRESSION ".*\.cu" )
 
 target_include_directories( testDemandLoading PUBLIC
@@ -89,6 +108,7 @@ configure_file( SourceDir.h.in include/SourceDir.h @ONLY )
 target_link_libraries( testDemandLoading
   testDemandLoadingKernels
   DemandLoadingKernels
+  ShaderUtil
   OptiX::OptiX
   DemandLoading
   CUDA::cudart
