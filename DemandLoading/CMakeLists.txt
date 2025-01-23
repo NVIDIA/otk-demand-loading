@@ -121,6 +121,7 @@ target_sources(DemandLoading
   FILE_SET HEADERS 
   BASE_DIRS include
   FILES
+  include/OptiXToolkit/DemandLoading/CubicFiltering.h
   include/OptiXToolkit/DemandLoading/DemandLoader.h
   include/OptiXToolkit/DemandLoading/DemandPageLoader.h
   include/OptiXToolkit/DemandLoading/DemandTexture.h
@@ -131,11 +132,13 @@ target_sources(DemandLoading
   include/OptiXToolkit/DemandLoading/RequestProcessor.h
   include/OptiXToolkit/DemandLoading/Resource.h
   include/OptiXToolkit/DemandLoading/Statistics.h
+  include/OptiXToolkit/DemandLoading/Texture2D.h
+  include/OptiXToolkit/DemandLoading/Texture2DCubic.h
   include/OptiXToolkit/DemandLoading/Texture2DExtended.h
   include/OptiXToolkit/DemandLoading/Texture2DFootprint.h
-  include/OptiXToolkit/DemandLoading/Texture2D.h
   include/OptiXToolkit/DemandLoading/TextureDescriptor.h
   include/OptiXToolkit/DemandLoading/TextureSampler.h
+  include/OptiXToolkit/DemandLoading/TextureUtil.h
   include/OptiXToolkit/DemandLoading/Ticket.h
   include/OptiXToolkit/DemandLoading/TileIndexing.h
 )
