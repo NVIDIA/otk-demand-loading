@@ -8,7 +8,11 @@
 /// Device-side functions for cubic filtering and sampling derivatives from a texture.
 
 using namespace otk;
-#include <OptiXToolkit/ShaderUtil/TextureUtil.h>
+#include <OptiXToolkit/DemandLoading/TextureUtil.h>
+#include <OptiXToolkit/ShaderUtil/vec_math.h>
+
+#define HD_INLINE __host__ __device__ static __forceinline__
+#define D_INLINE __device__ static __forceinline__
 
 D_INLINE float4 cubicWeights( float x )
 {

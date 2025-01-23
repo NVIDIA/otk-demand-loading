@@ -9,7 +9,7 @@
 
 #include <OptiXToolkit/DemandLoading/Texture2D.h>
 #include <OptiXToolkit/ShaderUtil/vec_math.h>
-#include <OptiXToolkit/ShaderUtil/CubicFiltering.h>
+#include <OptiXToolkit/DemandLoading/CubicFiltering.h>
 
 namespace demandLoading {
 
@@ -140,7 +140,7 @@ textureUdim( const DeviceContext& context, unsigned int textureId, float s, floa
         if( !useBaseTexture && bsmp->desc.isUdimBaseTexture )
         {
             float mipLevel = getMipLevel( ddx, ddy, bsmp->width, bsmp->height, 1.0f / bsmp->desc.maxAnisotropy );
-            useBaseTexture = ( mipLevel >= 0.0f ) || bsmp->hasCascade;
+            useBaseTexture = ( mipLevel >= 0.0f );
             if( useBaseTexture )
                 texelJitter = float2{0.0f};
         }
@@ -153,7 +153,7 @@ textureUdim( const DeviceContext& context, unsigned int textureId, float s, floa
             separateUdimCoord( s, CU_TR_ADDRESS_MODE_WRAP, bsmp->udim, subs, sidx );
             separateUdimCoord( t, CU_TR_ADDRESS_MODE_WRAP, bsmp->vdim, subt, tidx );
 
-            textureId = bsmp->udimStartPage + ( tidx * bsmp->udim + sidx ) * bsmp->numChannelTextures;
+            textureId = bsmp->udimStartPage + ( tidx * bsmp->udim + sidx ) /* * bsmp->numChannelTextures */;
             s = subs;
             t = subt;
             ddx = float2{ ddx.x * bsmp->udim, ddx.y * bsmp->vdim };

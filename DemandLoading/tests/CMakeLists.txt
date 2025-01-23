@@ -52,6 +52,9 @@ otk_add_executable( testDemandLoading
   PagingSystemTestKernels.cu
   PagingSystemTestKernels.h
   TestContextSaver.cpp
+  TestCubicFiltering.cpp
+  TestCubicFiltering.cu
+  TestCubicFiltering.h
   TestDemandLoader.cpp
   TestDemandPageLoader.cpp
   TestDemandTexture.cpp
@@ -91,6 +94,7 @@ target_link_libraries( testDemandLoading
   DemandLoadingKernels
   OptiX::OptiX
   DemandLoading
+  ShaderUtil
   CUDA::cudart
   OpenEXR::OpenEXR # for half
   GTest::gmock
