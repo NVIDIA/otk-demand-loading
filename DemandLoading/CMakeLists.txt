@@ -131,6 +131,7 @@ target_sources(DemandLoading
   include/OptiXToolkit/DemandLoading/Paging.h
   include/OptiXToolkit/DemandLoading/RequestProcessor.h
   include/OptiXToolkit/DemandLoading/Resource.h
+  include/OptiXToolkit/DemandLoading/SparseTextureDevices.h
   include/OptiXToolkit/DemandLoading/Statistics.h
   include/OptiXToolkit/DemandLoading/Texture2D.h
   include/OptiXToolkit/DemandLoading/Texture2DCubic.h
