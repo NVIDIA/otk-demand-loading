@@ -9,6 +9,11 @@
 
 enum FilterMode { FILTER_POINT=0, FILTER_BILINEAR, FILTER_BICUBIC, FILTER_SMARTBICUBIC };
 
+inline CUfilter_mode toCudaFilterMode( unsigned int mode )
+{
+    return ( mode == FILTER_POINT ) ? CU_TR_FILTER_MODE_POINT : CU_TR_FILTER_MODE_LINEAR;
+}
+
 /// Compute mip level from the texture gradients.
 #ifdef __CUDACC__
 OTK_INLINE OTK_DEVICE float getMipLevel( float2 ddx, float2 ddy, int texWidth, int texHeight, float invAnisotropy )
