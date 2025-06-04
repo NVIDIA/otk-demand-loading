@@ -272,8 +272,8 @@ void TestCubicFiltering::makeDemandTextureImages()
         demandLoading::DeviceContext context;
         demandLoader->launchPrepare( stream, context );
 
-        launchCubicTextureSubimageDrawKernel( stream, context, textureId, (float4*)devImage, (float4*)devDerivativeImage, 
-                                              width, height, uv00, uv11, ddx, ddy );
+        launchCubicTextureSubimageDrawKernel( stream, context, textureId, conservativeFilter, filterMode, (float4*)devImage,
+                                              (float4*)devDerivativeImage, width, height, uv00, uv11, ddx, ddy );
         Ticket ticket = demandLoader->processRequests( stream, context );
         ticket.wait();
 
